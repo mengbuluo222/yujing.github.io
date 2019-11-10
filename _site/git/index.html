@@ -1,0 +1,1254 @@
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>layout: post
+title: git 简单入门
+date: 2019-11-08
+Author: YJ
+tags: [sample, git]
+comments: true
+toc: true
+</code></pre></div></div>
+
+<h1 id="简介">简介</h1>
+
+<p>Git是目前世界上最先进的分布式版本控制系统（没有之一）。</p>
+
+<p>Git 是 Linus Torvalds 为了帮助管理 Linux 内核开发而开发的一个开放源码的版本控制软件。</p>
+
+<p>Git 与常用的版本控制工具 CVS, Subversion 等不同，它采用了分布式版本库的方式，不必服务器端软件支持。</p>
+
+<h2 id="那什么是版本控制系统"><strong>那什么是版本控制系统？</strong></h2>
+
+<p>如果你用Microsoft Word写过长篇大论，那你一定有这样的经历：</p>
+
+<p>想删除一个段落，又怕将来想恢复找不回来怎么办？有办法，先把当前文件“另存为……”一个新的Word文件，再接着改，改到一定程度，再“另存为……”一个新文件，这样一直改下去，最后你的Word文档变成了这样：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/918921393733152/0" alt="lots-of-docs" /></p>
+
+<p>过了一周，你想找回被删除的文字，但是已经记不清删除前保存在哪个文件里了，只好一个一个文件去找，真麻烦。</p>
+
+<p>看着一堆乱七八糟的文件，想保留最新的一个，然后把其他的删掉，又怕哪天会用上，还不敢删，真郁闷。</p>
+
+<p>更要命的是，有些部分需要你的财务同事帮助填写，于是你把文件Copy到U盘里给她（也可能通过Email发送一份给她），然后，你继续修改Word文件。一天后，同事再把Word文件传给你，此时，你必须想想，发给她之后到你收到她的文件期间，你作了哪些改动，得把你的改动和她的部分合并，真困难。</p>
+
+<p>于是你想，如果有一个软件，不但能自动帮我记录每次文件的改动，还可以让同事协作编辑，这样就不用自己管理一堆类似的文件了，也不需要把文件传来传去。如果想查看某次改动，只需要在软件里瞄一眼就可以，岂不是很方便？</p>
+
+<p>这个软件用起来就应该像这个样子，能记录每次文件的改动：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>版本</th>
+      <th>文件名</th>
+      <th>用户</th>
+      <th>说明</th>
+      <th>日期</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>service.doc</td>
+      <td>张三</td>
+      <td>删除了软件服务条款5</td>
+      <td>7/12 10:38</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>service.doc</td>
+      <td>张三</td>
+      <td>增加了License人数限制</td>
+      <td>7/12 18:09</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>service.doc</td>
+      <td>李四</td>
+      <td>财务部门调整了合同金额</td>
+      <td>7/13 9:51</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>service.doc</td>
+      <td>张三</td>
+      <td>延长了免费升级周期</td>
+      <td>7/14 15:17</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>这样，你就结束了手动管理多个“版本”的史前时代，进入到版本控制的20世纪。</p>
+
+<p><strong>版本控制就是不同的人操作同一事物，使得各版本得到兼容统一为最终版本。</strong></p>
+
+<h2 id="git的诞生"><strong>GIt的诞生</strong></h2>
+
+<p>很多人都知道，Linus在1991年创建了开源的Linux，从此，Linux系统不断发展，已经成为最大的服务器系统软件了。</p>
+
+<p>Linus虽然创建了Linux，但Linux的壮大是靠全世界热心的志愿者参与的，这么多人在世界各地为Linux编写代码，那Linux的代码是如何管理的呢？</p>
+
+<p>事实是，在2002年以前，世界各地的志愿者把源代码文件通过diff的方式发给Linus，然后由Linus本人通过手工方式合并代码！</p>
+
+<p>你也许会想，为什么Linus不把Linux代码放到版本控制系统里呢？不是有CVS、SVN这些免费的版本控制系统吗？因为Linus坚定地反对CVS和SVN，这些集中式的版本控制系统不但速度慢，而且必须联网才能使用。有一些商用的版本控制系统，虽然比CVS、SVN好用，但那是付费的，和Linux的开源精神不符。</p>
+
+<p>不过，到了2002年，Linux系统已经发展了十年了，代码库之大让Linus很难继续通过手工方式管理了，社区的弟兄们也对这种方式表达了强烈不满，于是Linus选择了一个商业的版本控制系统BitKeeper，BitKeeper的东家BitMover公司出于人道主义精神，授权Linux社区免费使用这个版本控制系统。</p>
+
+<p>安定团结的大好局面在2005年就被打破了，原因是Linux社区牛人聚集，不免沾染了一些梁山好汉的江湖习气。开发Samba的Andrew试图破解BitKeeper的协议（这么干的其实也不只他一个），被BitMover公司发现了（监控工作做得不错！），于是BitMover公司怒了，要收回Linux社区的免费使用权。</p>
+
+<p>Linus可以向BitMover公司道个歉，保证以后严格管教弟兄们，嗯，这是不可能的。实际情况是这样的：</p>
+
+<p>Linus花了两周时间自己用C写了一个分布式版本控制系统，这就是Git！一个月之内，Linux系统的源码已经由Git管理了！牛是怎么定义的呢？大家可以体会一下。</p>
+
+<p>Git迅速成为最流行的分布式版本控制系统，尤其是2008年，GitHub网站上线了，它为开源项目免费提供Git存储，无数开源项目开始迁移至GitHub，包括jQuery，PHP，Ruby等等。</p>
+
+<p>历史就是这么偶然，如果不是当年BitMover公司威胁Linux社区，可能现在我们就没有免费而超级好用的Git了。</p>
+
+<h2 id="git-与-svn-区别">Git 与 SVN 区别</h2>
+
+<p>Linus一直痛恨的<strong>CVS及SVN都是集中式的版本控制系统，而Git是分布式版本控制系统</strong>，集中式和分布式版本控制系统有什么区别呢？</p>
+
+<p>先说集中式版本控制系统，版本库是集中存放在中央服务器的，而干活的时候，用的都是自己的电脑，所以要先从中央服务器取得最新的版本，然后开始干活，干完活了，再把自己的活推送给中央服务器。中央服务器就好比是一个图书馆，你要改一本书，必须先从图书馆借出来，然后回到家自己改，改完了，再放回图书馆。</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/918921540355872/0" alt="central-repo" /></p>
+
+<p>集中式版本控制系统最大的毛病就是必须联网才能工作，如果在局域网内还好，带宽够大，速度够快，可如果在互联网上，遇到网速慢的话，可能提交一个10M的文件就需要5分钟，这还不得把人给憋死啊。</p>
+
+<p>那分布式版本控制系统与集中式版本控制系统有何不同呢？首先，分布式版本控制系统根本没有“中央服务器”，每个人的电脑上都是一个完整的版本库，这样，你工作的时候，就不需要联网了，因为版本库就在你自己的电脑上。既然每个人电脑上都有一个完整的版本库，那多个人如何协作呢？比方说你在自己电脑上改了文件A，你的同事也在他的电脑上改了文件A，这时，你们俩之间只需把各自的修改推送给对方，就可以互相看到对方的修改了。</p>
+
+<p><strong>和集中式版本控制系统相比，分布式版本控制系统的安全性要高很多</strong>，因为每个人电脑里都有完整的版本库，某一个人的电脑坏掉了不要紧，随便从其他人那里复制一个就可以了。而集中式版本控制系统的中央服务器要是出了问题，所有人都没法干活了。</p>
+
+<p>在实际使用分布式版本控制系统的时候，其实很少在两人之间的电脑上推送版本库的修改，因为可能你们俩不在一个局域网内，两台电脑互相访问不了，也可能今天你的同事病了，他的电脑压根没有开机。因此，分布式版本控制系统通常也有一台充当“中央服务器”的电脑，但这个服务器的作用仅仅是用来方便“交换”大家的修改，没有它大家也一样干活，只是交换修改不方便而已。</p>
+
+<p>当然，Git的优势不单是不必联网这么简单，后面我们还会看到<strong>Git极其强大的分支管理</strong>，把SVN等远远抛在了后面。</p>
+
+<p>CVS作为最早的开源而且免费的集中式版本控制系统，直到现在还有不少人在用。由于CVS自身设计的问题，会造成提交文件不完整，版本库莫名其妙损坏的情况。同样是开源而且免费的SVN修正了CVS的一些稳定性问题，是目前用得最多的集中式版本库控制系统。</p>
+
+<p>除了免费的外，还有收费的集中式版本控制系统，比如IBM的ClearCase（以前是Rational公司的，被IBM收购了），特点是安装比Windows还大，运行比蜗牛还慢，能用ClearCase的一般是世界500强，他们有个共同的特点是财大气粗，或者人傻钱多。</p>
+
+<p>微软自己也有一个集中式版本控制系统叫VSS，集成在Visual Studio中。由于其反人类的设计，连微软自己都不好意思用了。</p>
+
+<p>分布式版本控制系统除了Git以及促使Git诞生的BitKeeper外，还有类似Git的Mercurial和Bazaar等。这些分布式版本控制系统各有特点，但最快、最简单也最流行的依然是Git！</p>
+
+<p>Git 与 SVN 区别点：</p>
+
+<p><strong>1、Git 是分布式的，SVN 不是</strong>：这是 Git 和其它非分布式的版本控制系统，例如 SVN，CVS 等，最核心的区别。</p>
+
+<p><strong>2、Git 把内容按元数据方式存储，而 SVN 是按文件：</strong>所有的资源控制系统都是把文件的元信息隐藏在一个类似 .svn、.cvs 等的文件夹里。</p>
+
+<p><strong>3、Git 分支和 SVN 的分支不同：</strong>分支在 SVN 中一点都不特别，其实它就是版本库中的另外一个目录。</p>
+
+<p><strong>4、Git 没有一个全局的版本号，而 SVN 有：</strong>目前为止这是跟 SVN 相比 Git 缺少的最大的一个特征。</p>
+
+<p><strong>5、Git 的内容完整性要优于 SVN：</strong>Git 的内容存储使用的是 SHA-1 哈希算法。这能确保代码内容的完整性，确保在遇到磁盘故障和网络问题时降低对版本库的破坏。</p>
+
+<p><img src="https://www.runoob.com/wp-content/uploads/2015/02/0D32F290-80B0-4EA4-9836-CA58E22569B3.jpg" alt="img" /></p>
+
+<p><strong>Git的优势</strong></p>
+
+<ul>
+  <li>无需联网即可操作</li>
+  <li>保证数据的完整性</li>
+  <li>多数操作仅添加数据（只要提交快照，不用单行数据丢失，所以养成定期推送到其他仓库的习惯非常重要）</li>
+  <li>Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的概念。</li>
+  <li>Git跟踪并管理的是修改，而非文件</li>
+  <li>远程仓库，多仓库管理</li>
+</ul>
+
+<h1 id="安装git">安装Git</h1>
+
+<p>现在，Git可以在Linux、Unix、Mac和Windows这几大平台上正常运行。</p>
+
+<h2 id="linux上安装git">Linux上安装Git</h2>
+
+<p>（1）通过在终端输入 <code class="highlighter-rouge">git</code> ,查看系统是否安装了Git</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git
+The program <span class="s1">'git'</span> is currently not installed. You can install it by typing:
+<span class="nb">sudo </span>apt-get install git
+</code></pre></div></div>
+
+<p>（2）根据系统选择合适的安装方式</p>
+
+<p><strong>Debian/Ubuntu系统，通过以下代码安装</strong>：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get install git
+</code></pre></div></div>
+
+<p><strong>centos/RedHat系统（老一点的系统），通过以下代码安装：</strong></p>
+
+<p>因为以前有个软件也叫GIT（GNU Interactive Tools），结果Git就只能叫<code class="highlighter-rouge">git-core</code>了。由于Git名气实在太大，后来就把GNU Interactive Tools改成<code class="highlighter-rouge">gnuit</code>，<code class="highlighter-rouge">git-core</code>正式改为<code class="highlighter-rouge">git</code>。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt-get install git-core
+</code></pre></div></div>
+
+<p><strong>如果是其他Linux版本，可以直接通过源码安装。</strong></p>
+
+<p>先从Git官网下载源码，然后解压，依次输入：<code class="highlighter-rouge">./config</code>，<code class="highlighter-rouge">make</code>，<code class="highlighter-rouge">sudo make install</code>这几个命令安装就好了。</p>
+
+<h2 id="mac-上安装git">MAC 上安装Git</h2>
+
+<p>两种安装方式：</p>
+
+<p>（1）安装home brew，然后通过home brew安装Git，具体方法请参考home brew的文档：http://brew.sh/。</p>
+
+<p>（2）这种更简单，也是推荐的方法，就是直接从AppStore安装Xcode，Xcode集成了Git，不过默认没有安装，你需要运行Xcode，选择菜单“Xcode”-&gt;“Preferences”，在弹出窗口中找到“Downloads”，选择“Command Line Tools”，点“Install”就可以完成安装了。</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919018691743136/0" alt="install-git-by-xcode" /></p>
+
+<h2 id="windows-上安装git">windows 上安装Git</h2>
+
+<p>Git官网下载安装程序（网速慢可以下载镜像），然后按默认程序安装。</p>
+
+<p>在开始菜单中找到“Git”-&gt; “Git Bash”，弹出命令窗口，说明安装成功。</p>
+
+<p>在命令行输入以下代码，完成设置</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git config <span class="nt">--global</span> user.name <span class="s2">"Your Name"</span>
+<span class="nv">$ </span>git config <span class="nt">--global</span> user.email <span class="s2">"email@example.com"</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>因为Git是分布式版本控制系统，所以，每个机器都必须自报家门：你的名字和Email地址。你也许会担心，如果有人故意冒充别人怎么办？这个不必担心，首先我们相信大家都是善良无知的群众，其次，真的有冒充的也是有办法可查的。</p>
+
+  <p>注意<code class="highlighter-rouge">git config</code>命令的<code class="highlighter-rouge">--global</code>参数，用了这个参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。</p>
+</blockquote>
+
+<h1 id="git工作流程">Git工作流程</h1>
+
+<p>（1）克隆Git资源作为工作目录；</p>
+
+<p>（2）在克隆的资源上添加或修改文件；</p>
+
+<p>（3）如果其他人修改了，你可以更新资源；</p>
+
+<p>（4）在提交前查看修改；对修改后的文件快照，然后保存到暂存区</p>
+
+<p>（5）提交修改</p>
+
+<p>（6）在修改完成后，如果发现错误，可以撤回提交并再次修改并提交。将保存在暂存区的文件快照永久转储到Git目录中</p>
+
+<p><img src="https://www.runoob.com/wp-content/uploads/2015/02/git-process.png" alt="img" /></p>
+
+<h1 id="git工作区暂存区和版本库">Git工作区、暂存区和版本库</h1>
+
+<p><strong>工作区：就是你在电脑里能看到的目录</strong></p>
+
+<p><strong>暂存区：index。一般存放在“.Git目录下”的index文件中（.git/index）,所以我们把暂存盘也叫做索引。</strong></p>
+
+<p><strong>版本库：工作区有一个隐藏目录.git，这个不算工作区，而是git的版本库。</strong></p>
+
+<p>Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支<code class="highlighter-rouge">master</code>，以及指向<code class="highlighter-rouge">master</code>的一个指针叫<code class="highlighter-rouge">HEAD</code>。</p>
+
+<p>前面讲了我们把文件往Git版本库里添加的时候，是分两步执行的：</p>
+
+<p>第一步是用<code class="highlighter-rouge">git add</code>把文件添加进去，实际上就是把文件修改添加到暂存区；</p>
+
+<p>第二步是用<code class="highlighter-rouge">git commit</code>提交更改，实际上就是把暂存区的所有内容提交到当前分支。</p>
+
+<p>因为我们创建Git版本库时，Git自动为我们创建了唯一一个<code class="highlighter-rouge">master</code>分支，所以，现在，<code class="highlighter-rouge">git commit</code>就是往<code class="highlighter-rouge">master</code>分支上提交更改。</p>
+
+<p>你可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。</p>
+
+<p><strong>Git核心</strong></p>
+
+<p>核心文件包括config文件，objects文件夹，HEAD文件，index文件及refs文件夹</p>
+
+<p>（1）config文件</p>
+
+<p>记录项目的配置信息</p>
+
+<p>（2）objects文件夹：</p>
+
+<p>主要包含Git对象。Git为了节省存储对象所占用的磁盘空间，会定期对Git对象进行压缩和打包，其中pack文件夹用于存储打包压缩的对象，而info文件夹用于从打包的文件中查找Git对象。</p>
+
+<blockquote>
+  <p>Git对象又分为：</p>
+
+  <p>BLOB：全称binary large object,用来存储文件内容，几乎可以存储所有类型的文件，也可以当做一种数据类型</p>
+
+  <p>commit：存储一次提交的信息，包括所在的tree,parent是谁，以及提交的作者是谁等信息。</p>
+
+  <p>总结</p>
+
+  <p>每一次commit对应一个tree，这个tree又记录了整个文档的目录结构，文件的每一次修改又会生成一个blob，blob信息记录在tree下面。</p>
+</blockquote>
+
+<p>（3）HEAD文件</p>
+
+<p>该文件指明了Git branch（即当前分支）的结果，比如当前分支是master，则该文件就会指向master，但并不存储master字符串，而是分支在refs中的表示，如ref:refs/heads/master</p>
+
+<p>（4）index 文件</p>
+
+<p>该文件保存暂存区域的信息，内容包括它指向的文件时间戳、文件名、sha1值等</p>
+
+<p>（5）refs 文件夹</p>
+
+<p>该文件夹存储指向数据分支的提交对象的指针</p>
+
+<p><strong>在Git内部，文件的三种状态（重点理解）</strong></p>
+
+<p>任何一个文件，在Git内部都只有三个状态：</p>
+
+<p>已提交：表示该文件已经被安全的保存在本地数据库中</p>
+
+<p>已修改：表示修改了某个文件，但还没有提交保存</p>
+
+<p>已暂存：表示把修改的文件放在下次提交时要保存的清单中</p>
+
+<h1 id="创建版本库">创建版本库</h1>
+
+<p>版本库又名仓库，英文名<strong>repository</strong>，你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。</p>
+
+<p>（1）创建空目录</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>mkdir learngit
+<span class="nv">$ </span><span class="nb">cd </span>learngit
+<span class="nv">$ </span><span class="nb">pwd</span>
+/user/michael/learngit
+</code></pre></div></div>
+
+<p>注意：目录不能为中文</p>
+
+<blockquote>
+  <p>cd : change directory的简写，改变目录的意思，就是切换到哪个目录下， 如 cd e:\fff  切换 E 盘下面的fff 目录。</p>
+
+  <p>pwd：用于显示当前目录。</p>
+</blockquote>
+
+<p>（2）通过<code class="highlighter-rouge">git init</code>命令，初始化仓库。把这个目录变成Git可以管理的仓库。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git init
+Initialized empty Git repository <span class="k">in</span> /Users/michael/learngit/.git/
+</code></pre></div></div>
+
+<p>瞬间Git就把仓库建好了，而且告诉你是一个空的仓库（empty Git repository），细心的读者可以发现当前目录下多了一个<code class="highlighter-rouge">.git</code>的目录，这个目录是Git来跟踪管理版本库的，没事千万不要手动修改这个目录里面的文件，不然改乱了，就把Git仓库给破坏了。</p>
+
+<p>如果你没有看到<code class="highlighter-rouge">.git</code>目录，那是因为这个目录默认是隐藏的，用<code class="highlighter-rouge">ls  -ah</code>命令就可以看见。</p>
+
+<p>我们还可以指定目录为仓库：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git init newrepo
+</code></pre></div></div>
+
+<h1 id="基本操作">基本操作</h1>
+
+<p><strong>（1）git init 目录中创建新的 Git 仓库。 任何时候、任何目录中这么做，完全是本地化的。</strong></p>
+
+<p><strong>（2）git clone 拷贝一个 Git 仓库到本地，让自己能够查看该项目，或者进行修改。</strong></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone <span class="o">[</span>url]
+</code></pre></div></div>
+
+<p>[url] 为你想要复制的项目</p>
+
+<p>克隆完成后，在当前目录下会生成一个 simplegit 目录：</p>
+
+<p>（3）Git add  将想要快照的内容写入缓存区</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git add [参数]  [--] &lt;路径&gt;
+</code></pre></div></div>
+
+<p>提示：要绑定的文件存储在 learngit 下</p>
+
+<p>git commit  将缓存区内容添加到仓库中</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git add <span class="k">*</span>.c  
+<span class="nv">$ </span>git add README
+<span class="nv">$ </span>git commit <span class="nt">-m</span> <span class="s1">'初始化项目版本'</span>
+</code></pre></div></div>
+
+<p>以上命令将目录下以 .c 结尾及 README 文件提交到仓库中。</p>
+
+<p><strong>（4）git status 查看在你上次提交之后是否有修改</strong></p>
+
+<p>参数：-s  获得简短的结果输出</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ </span>git status
+On branch master
+Changes not staged <span class="k">for </span>commit:
+  <span class="o">(</span>use <span class="s2">"git add &lt;file&gt;..."</span> to update what will be committed<span class="o">)</span>
+  <span class="o">(</span>use <span class="s2">"git checkout -- &lt;file&gt;..."</span> to discard changes <span class="k">in </span>working directory<span class="o">)</span>
+
+	modified:   readme.txt
+
+no changes added to commit <span class="o">(</span>use <span class="s2">"git add"</span> and/or <span class="s2">"git commit -a"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>提示：执行此条命令需要先修改文件并再次提交给版本控制，再运行此代码。</p>
+
+<p><code class="highlighter-rouge">git status</code>命令可以让我们时刻掌握仓库当前的状态，上面的命令输出告诉我们，<code class="highlighter-rouge">readme.txt</code>被修改过了，但还没有准备提交的修改。</p>
+
+<p>（5）git diff 来查看执行 git status 的结果的详细信息。可以比较索引库中文件和原版本的差异</p>
+
+<p>git diff 命令显示已写入缓存与已修改但尚未写入缓存的改动的区别。git diff 有两个主要的应用场景。</p>
+
+<ul>
+  <li>尚未缓存的改动：<strong>git diff</strong></li>
+  <li>查看已缓存的改动： <strong>git diff –cached</strong></li>
+  <li>查看已缓存的与未缓存的所有改动：<strong>git diff HEAD</strong></li>
+  <li>显示摘要而非整个 diff：<strong>git diff –stat</strong></li>
+</ul>
+
+<p>（6）git commit 将缓存区内容添加到仓库中。</p>
+
+<p>commit 将暂存区的改动提交到本地版本库，类似保存快照。如果文件没有改变，git不会再次保存，而是只对上次保存的快照做一链接</p>
+
+<p><strong>Git 为你的每一个提交都记录你的名字与电子邮箱地址，所以第一步需要配置用户名和邮箱地址。</strong></p>
+
+<p>提示：只有对文件进行了修改，执行这段代码才有效</p>
+
+<p>注意：在暂存区的修改不会提交到版本库</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$git</span> add filename
+<span class="nv">$git</span> commit <span class="nt">-m</span> <span class="s2">"append GPL"</span>
+</code></pre></div></div>
+
+<p>-m 解释说明本次提交内容的文字</p>
+
+<p>如果你没有设置 -m 选项，Git 会尝试为你打开一个编辑器以填写提交信息。 如果 Git 在你对它的配置中找不到相关信息，默认会打开 vim</p>
+
+<p>如果你觉得 git add 提交缓存的流程太过繁琐，Git 也允许你用 -a 选项跳过这一步。命令格式如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git commit -a
+</code></pre></div></div>
+
+<blockquote>
+  <p>拓展：</p>
+
+  <p>要了解git commit -m与git commit -am的区别，首先要明白它们的定义</p>
+
+  <p>字面解释的话，git commit -m用于提交暂存区的文件，git commit -am用于提交跟踪过的文件</p>
+
+  <p>[注意]git commit -am可以写成git commit -a -m，但不能写成git commit -m -a</p>
+</blockquote>
+
+<p><strong>（7）git log 查看版本修改历史记录</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -&gt; master)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+commit e475afc93c209a690c39c13a46716e8fa000c366
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:03:36 2018 +0800
+
+    add distributed
+
+commit eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 20:59:18 2018 +0800
+
+    wrote a readme file
+</code></pre></div></div>
+
+<p>命令显示从最近到最远的提交日志，我们可以看到3次提交，最近的一次是<code class="highlighter-rouge">append GPL</code>，上一次是<code class="highlighter-rouge">add distributed</code>，最早的一次是<code class="highlighter-rouge">wrote a readme file</code>。</p>
+
+<p><strong>查看历史记录的简洁的版本。</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --oneline
+</code></pre></div></div>
+
+<p><strong>查看历史中什么时候出现了分支、合并</strong>。以下为相同的命令，开启了拓扑图选项：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --graph
+</code></pre></div></div>
+
+<p><strong>逆向显示所有日志</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --reverse --oneline
+</code></pre></div></div>
+
+<p><strong>查找指定用户的提交日志</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --author=Linus --oneline -5
+</code></pre></div></div>
+
+<p><strong>指定日期</strong>，可以执行几个选项：–since 和 –before，但是你也可以用 –until 和 –after。</p>
+
+<p>例如，如果我要看 Git 项目中三周前且在四月十八日之后的所有提交，我可以执行这个（我还用了 –no-merges 选项以隐藏合并提交）：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --oneline --before={3.weeks.ago} --after={2010-04-18} --no-merges
+5469e2d Git 1.7.1-rc2
+d43427d Documentation/remote-helpers: Fix typos and improve language
+272a36b Fixup: Second argument may be any arbitrary string
+b6c8d2d Documentation/remote-helpers: Add invocation section
+5ce4f4e Documentation/urls: Rewrite to accomodate transport::address
+00b84e9 Documentation/remote-helpers: Rewrite description
+03aa87e Documentation: Describe other situations where -z affects git diff
+77bc694 rebase-interactive: silence warning when no commits rewritten
+636db2c t3301: add tests to use --format="%N"
+</code></pre></div></div>
+
+<p><strong>（8）git reset 版本回退</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git reset --hard commit_id  #各个版本的切换
+</code></pre></div></div>
+
+<p><strong>（9）git reflog 记录每一次命令</strong></p>
+
+<p><strong>（10）git rm   移除某个文件</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git rm file  从跟踪文件清单中移除，删除工作区文件，为保证工作区与版本库一致需要从新git  commit
+
+git rm -f file 强制删除已经放到暂存区的文件
+
+git rm --cached 暂存区删除，不删除工作区
+
+git rm –r *  递归删除，参数为目录
+</code></pre></div></div>
+
+<p><strong>（11）Git mv</strong></p>
+
+<p>用于移动或重命名一个文件、目录、软连接。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git mv README  README.md
+$ ls
+README.md
+</code></pre></div></div>
+
+<p><strong>（12）git checkout – file 撤销修改</strong></p>
+
+<p>命令中的<code class="highlighter-rouge">--</code>很重要，没有<code class="highlighter-rouge">--</code>，就变成了“切换到另一个分支”的命令，我们在后面的分支管理中会再次遇到<code class="highlighter-rouge">git checkout</code>命令。</p>
+
+<h1 id="github">github</h1>
+
+<p>github这个网站就是提供Git仓库托管服务的，所以，只要注册一个GitHub账号，就可以免费获得Git远程仓库。</p>
+
+<p>github是一个基于git的代码托管平台，付费用户可以建私人仓库，我们一般的免费用户只能使用公共仓库，也就是代码要公开。</p>
+
+<blockquote>
+  <p>查看用户主目录 cd ~/.ssh</p>
+
+  <p>查看私钥 cat id_rsa</p>
+
+  <p>查看公钥 cat id_ras.pub</p>
+</blockquote>
+
+<h2 id="添加远程库">添加远程库</h2>
+
+<p>通过github获取Git远程仓库，登录注册github的流程：</p>
+
+<p><strong>（1）注册Github 账号</strong></p>
+
+<p>由于你的本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：</p>
+
+<p><strong>配置Git</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh-keygen -t rsa -C "youremail@example.com"
+</code></pre></div></div>
+
+<p>创建SSH Key，创建成功会在用户主目录里找到.ssh目录，里面有<code class="highlighter-rouge">id_rsa</code>和<code class="highlighter-rouge">id_rsa.pub</code>两个文件，这两个就是SSH Key的秘钥对，<code class="highlighter-rouge">id_rsa</code>是私钥，不能泄露出去，<code class="highlighter-rouge">id_rsa.pub</code>是公钥，可以放心地告诉任何人。</p>
+
+<p><strong>（2）登陆GitHub，打开“Account settings”，“SSH Keys”页面：</strong></p>
+
+<p>成功的话会在<code class="highlighter-rouge">~/</code>下生成<code class="highlighter-rouge">.ssh</code>文件夹，进去，打开<code class="highlighter-rouge">id_rsa.pub</code>，复制里面的<code class="highlighter-rouge">key</code>。</p>
+
+<p>回到github上，进入 Account Settings（账户配置），左边选择SSH Keys，Add SSH Key,title随便填，粘贴在你电脑上生成的key。</p>
+
+<p><img src="https://www.runoob.com/wp-content/uploads/2014/05/github-account.jpg" alt="github-account" /></p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919021379029408/0" alt="" /></p>
+
+<p><strong>（3）为了验证是否成功，在git bash下输入：</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh -T git@github.com
+</code></pre></div></div>
+
+<p>点“Add Key”，你就应该看到已经添加的Key：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919021395420160/0" alt="github-addkey-2" /></p>
+
+<p>（4）接下来我们要做的就是把本地仓库传到github上去，在此之前还需要设置username和email，因为github每次commit都会记录他们。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git config --global user.name "your name"
+$ git config --global user.email "your_email@youremail.com"
+</code></pre></div></div>
+
+<p>（5）在本地工作区执行终端命令，将工作区与远程库建立关联</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote add origin git@github.com:mengbuluo222/learngit.git
+</code></pre></div></div>
+
+<p>（6）将本地库的所有内容推送到远程库上</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push -u origin master
+</code></pre></div></div>
+
+<p>把本地库的内容推送到远程，用<code class="highlighter-rouge">git push</code>命令，实际上是把当前分支<code class="highlighter-rouge">master</code>推送到远程。</p>
+
+<p>由于远程库是空的，我们第一次推送<code class="highlighter-rouge">master</code>分支时，加上了<code class="highlighter-rouge">-u</code>参数，Git不但会把本地的<code class="highlighter-rouge">master</code>分支内容推送的远程新的<code class="highlighter-rouge">master</code>分支，还会把本地的<code class="highlighter-rouge">master</code>分支和远程的<code class="highlighter-rouge">master</code>分支关联起来，在以后的推送或者拉取时就可以简化命令。</p>
+
+<p>（7）更新与合并</p>
+
+<p>要更新你的本地仓库至最新改动，执行：
+            <code class="highlighter-rouge">git pull 抓取</code>
+            以在你的工作目录中 <em>获取（fetch）</em> 并 <em>合并（merge）</em> 远端的改动。
+            要合并其他分支到你的当前分支（例如 master），执行：
+            <code class="highlighter-rouge">git merge 合并</code>
+            在这两种情况下，git 都会尝试去自动合并改动。遗憾的是，这可能并非每次都成功，并可能出现<em>冲突（conflicts）</em>。            这时候就需要你修改这些文件来手动合并这些<em>冲突（conflicts）</em>。改完之后，你需要执行如下命令以将它们标记为合并成功：
+            <code class="highlighter-rouge">git add </code>
+            在合并改动之前，你可以使用如下命令预览差异：
+            <code class="highlighter-rouge">git diff  </code></p>
+
+<p><strong>常用命令：</strong></p>
+
+<p>查看当前远程库：  Git remote</p>
+
+<p>执行时加上 -v 参数，你还可以看到每个别名的实际链接地址。</p>
+
+<p>查看所有分支：Git branch -a</p>
+
+<p>查看远程分支：Git branch -r</p>
+
+<p>查看本地分支：Git branch</p>
+
+<p>从远程仓库下载新分支与数据：git fetch</p>
+
+<p>从远端仓库提取数据并尝试合并到当前分支：git merge</p>
+
+<p>推送你的新分支与数据到某个远端仓库:git push [alias] [branch]</p>
+
+<p>删除远程仓库：git remote rm [别名]</p>
+
+<p><strong>rm</strong>命令的一般形式为：<strong>rm</strong> [选项]… 目录… 删除指定的<文件>(即解除链接)。</文件></p>
+
+<p>-d   –directory  删除可能仍有数据的目录 (只限超级用户)</p>
+
+<p>-f   –force     略过不存在的文件，不显示任何信息，强制删除</p>
+
+<p>-i   –interactive 进行任何删除操作前必须先确认</p>
+
+<p>-r/R –recursive  同时删除该目录下的所有目录层</p>
+
+<p>-v   –verbose   详细显示进行的步骤</p>
+
+<p>​     –help      显示此帮助信息并离开</p>
+
+<p>​     –version   显示版本信息并离开</p>
+
+<p>**PS1：最好用的带参命令是rm -rf <filename>，确定好了要删除的话，改命令不管是文件夹还是文件都会直接强制删除。**</filename></p>
+
+<p>**PS2：rm同时删除多个文件命令：rm  <filename1>  <filename2>**</filename2></filename1></p>
+
+<p>要删除第一个字符为‘-’的文件 (例如‘-foo’)，请使用以下其中一种方法：
+<strong>rm</strong> – -foo</p>
+
+<p><strong>rm</strong> ./-foo</p>
+
+<p>请注意，如果使用 rm 来删除文件，通常仍可以将该文件恢复原状。如果想保证
+该文件的内容无法还原，请考虑使用 shred。</p>
+
+<p>删除文件夹：rm -rf filename</p>
+
+<p>恢复缓存文件：vi -r xxx.c</p>
+
+<p>删除缓存文件：rm -rf xxx.swp</p>
+
+<p>查看远程库：git remote</p>
+
+<p>查看远程库信息：git remote show originname</p>
+
+<p>撤销操作：git checkout</p>
+
+<h2 id="从远程库克隆">从远程库克隆</h2>
+
+<p>（1）登录github，创建一个远程库，库名gitskills</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919021808263616/0" alt="github-init-repo" /></p>
+
+<p>我们勾选<code class="highlighter-rouge">Initialize this repository with a README</code>，这样GitHub会自动为我们创建一个<code class="highlighter-rouge">README.md</code>文件。创建完毕后，可以看到<code class="highlighter-rouge">README.md</code>文件。</p>
+
+<p>现在，远程库已经准备好了，下一步是用命令<code class="highlighter-rouge">git clone</code>克隆一个本地库：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone git@github.com:mengbuluo222/gitskills.git
+Cloning into 'gitskills'...
+remote: Counting objects: 3, done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 3
+Receiving objects: 100% (3/3), done.
+</code></pre></div></div>
+
+<h1 id="分支管理">分支管理</h1>
+
+<p>同一项目，每个人都有自己的工作任务即分支，为了保证可以记录每天的进度，我们可以随时提交内容到分支，直到开发完毕再一次性合并到主分支上，这样可以实现既安全又不会影响别人的工作。</p>
+
+<h2 id="创建与合并分支">创建与合并分支</h2>
+
+<p>我们知道，在版本回退里Git会把每次提交串成一条时间线，这条时间线就是分支。截止到目前只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD从严格来说并不指向提交，而是指向master，master才是指向提交的，所以HEAD指向的就是当前分支</p>
+
+<p><strong>帮助理解</strong></p>
+
+<p>一开始的时候，<code class="highlighter-rouge">master</code>分支是一条线，Git用<code class="highlighter-rouge">master</code>指向最新的提交，再用<code class="highlighter-rouge">HEAD</code>指向<code class="highlighter-rouge">master</code>，就能确定当前分支，以及当前分支的提交点：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919022325462368/0" alt="git-br-initial" /></p>
+
+<p>每次提交，<code class="highlighter-rouge">master</code>分支都会向前移动一步，这样，随着你不断提交，<code class="highlighter-rouge">master</code>分支的线也越来越长。</p>
+
+<p>当我们创建新的分支，例如<code class="highlighter-rouge">dev</code>时，Git新建了一个指针叫<code class="highlighter-rouge">dev</code>，指向<code class="highlighter-rouge">master</code>相同的提交，再把<code class="highlighter-rouge">HEAD</code>指向<code class="highlighter-rouge">dev</code>，就表示当前分支在<code class="highlighter-rouge">dev</code>上：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919022363210080/0" alt="git-br-create" /></p>
+
+<p>你看，Git创建一个分支很快，因为除了增加一个<code class="highlighter-rouge">dev</code>指针，改改<code class="highlighter-rouge">HEAD</code>的指向，工作区的文件都没有任何变化！</p>
+
+<p>不过，从现在开始，对工作区的修改和提交就是针对<code class="highlighter-rouge">dev</code>分支了，比如新提交一次后，<code class="highlighter-rouge">dev</code>指针往前移动一步，而<code class="highlighter-rouge">master</code>指针不变：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919022387118368/0" alt="git-br-dev-fd" /></p>
+
+<p>假如我们在<code class="highlighter-rouge">dev</code>上的工作完成了，就可以把<code class="highlighter-rouge">dev</code>合并到<code class="highlighter-rouge">master</code>上。Git怎么合并呢？最简单的方法，就是直接把<code class="highlighter-rouge">master</code>指向<code class="highlighter-rouge">dev</code>的当前提交，就完成了合并：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919022412005504/0" alt="git-br-ff-merge" /></p>
+
+<p>所以Git合并分支也很快！就改改指针，工作区内容也不变！</p>
+
+<p>合并完分支后，甚至可以删除<code class="highlighter-rouge">dev</code>分支。删除<code class="highlighter-rouge">dev</code>分支就是把<code class="highlighter-rouge">dev</code>指针给删掉，删掉后，我们就剩下了一条<code class="highlighter-rouge">master</code>分支：</p>
+
+<p><img src="https://www.liaoxuefeng.com/files/attachments/919022479428512/0" alt="git-br-rm" /></p>
+
+<p>（1）创建分支并切换</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git checkout -b dev
+Switched to a new branch 'dev'
+</code></pre></div></div>
+
+<p>相当于以下两条命令：</p>
+
+<p>创建分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git branch dev 
+</code></pre></div></div>
+
+<p>切换分支：</p>
+
+<p><code class="highlighter-rouge">git checkout </code>或者<code class="highlighter-rouge">git switch </code></p>
+
+<p>（2）查看当前分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git branch
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">git branch</code>命令会列出所有分支，当前分支前面会标一个<code class="highlighter-rouge">*</code>号。</p>
+
+<p>（3）合并某分支到当前分支：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git merge 
+</code></pre></div></div>
+
+<p>（5）删除分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git branch -d name
+</code></pre></div></div>
+
+<p>拓展：</p>
+
+<p>switch</p>
+
+<p>我们注意到切换分支使用<code class="highlighter-rouge">git checkout </code>，而前面讲过的撤销修改则是<code class="highlighter-rouge">git checkout -- </code>，同一个命令，有两种作用，确实有点令人迷惑。</p>
+
+<p>实际上，切换分支这个动作，用<code class="highlighter-rouge">switch</code>更科学。因此，最新版本的Git提供了新的<code class="highlighter-rouge">git switch</code>命令来切换分支：</p>
+
+<p>创建并切换到新的<code class="highlighter-rouge">dev</code>分支，可以使用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git switch -c dev
+</code></pre></div></div>
+
+<p>直接切换到已有的<code class="highlighter-rouge">master</code>分支，可以使用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git switch master
+</code></pre></div></div>
+
+<p>使用新的<code class="highlighter-rouge">git switch</code>命令，比<code class="highlighter-rouge">git checkout</code>要更容易理解。</p>
+
+<h2 id="解决冲突">解决冲突</h2>
+
+<p>当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
+
+<p>解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。</p>
+
+<p>用<code class="highlighter-rouge">git log --graph</code>命令可以看到分支合并图。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --graph --pretty=oneline --abbrev-commit
+</code></pre></div></div>
+
+<p>解决完之后就可以删除分支了</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$git branch -d feature1
+</code></pre></div></div>
+
+<h2 id="分支管理策略">分支管理策略</h2>
+
+<p>通常，合并分支时，如果可能，Git会用<code class="highlighter-rouge">Fast forward</code>模式，但这种模式下，删除分支后，会丢掉分支信息。</p>
+
+<p>如果要强制禁用<code class="highlighter-rouge">Fast forward</code>模式，Git就会在merge时生成一个新的commit，这样，从分支历史上就可以看出分支信息。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git merge --no-ff -m "merge with no-ff" dev
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre></div></div>
+
+<p>因为本次合并要创建一个新的commit，所以加上<code class="highlighter-rouge">-m</code>参数，把commit描述写进去。</p>
+
+<p>合并后，我们用<code class="highlighter-rouge">git log</code>看看分支历史：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   e1e9c68 (HEAD -&gt; master) merge with no-ff
+|\  
+| * f52c633 (dev) add merge
+|/  
+*   cf810e4 conflict fixed
+...
+</code></pre></div></div>
+
+<h2 id="bug分支">bug分支</h2>
+
+<p>当你的工作做到一半的时候，一个修复bug的工作丢过来，而原来的工作又不能提交。为了保存当前工作状态，Git还提供了一个<code class="highlighter-rouge">stash</code>功能，可以把当前工作现场“储藏”起来，等以后恢复现场后继续工作：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git stash
+Saved working directory and index state WIP on dev: f52c633 add merge
+</code></pre></div></div>
+
+<p>现在，用<code class="highlighter-rouge">git status</code>查看工作区，就是干净的（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。</p>
+
+<p>首先确定要在哪个分支上修复bug，假定需要在<code class="highlighter-rouge">master</code>分支上修复，就从<code class="highlighter-rouge">master</code>创建临时分支：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use "git push" to publish your local commits)
+
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+</code></pre></div></div>
+
+<p>修复完成后，切换到<code class="highlighter-rouge">master</code>分支，并完成合并，最后删除<code class="highlighter-rouge">issue-101</code>分支：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use "git push" to publish your local commits)
+
+$ git merge --no-ff -m "merged bug fix 101" issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre></div></div>
+
+<p>切回到原来的工作状态，发现工作区是干净的，刚才的工作现场存到哪去了？用<code class="highlighter-rouge">git stash list</code>命令看看：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git stash list
+stash@{0}: WIP on dev: f52c633 add merge
+</code></pre></div></div>
+
+<p>工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：</p>
+
+<p>一是用<code class="highlighter-rouge">git stash apply</code>恢复，但是恢复后，stash内容并不删除，你需要用<code class="highlighter-rouge">git stash drop</code>来删除；</p>
+
+<p>另一种方式是用<code class="highlighter-rouge">git stash pop</code>，恢复的同时把stash内容也删了：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git stash pop
+On branch dev
+Changes to be committed:
+  (use "git reset HEAD &lt;file&gt;..." to unstage)
+
+	new file:   hello.py
+
+Changes not staged for commit:
+  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git checkout -- &lt;file&gt;..." to discard changes in working directory)
+
+	modified:   readme.txt
+
+Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
+</code></pre></div></div>
+
+<p>删除分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git branch -d feature-vulcan
+</code></pre></div></div>
+
+<p>强制删除分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git branch -D feature-vulcan
+</code></pre></div></div>
+
+<p>复制一个特定的提交到当前分支</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git cherry-pick 4c805e2
+[master 1d4b803] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre></div></div>
+
+<h2 id="多人协作">多人协作</h2>
+
+<p>多人协作的工作模式通常是这样：</p>
+
+<ol>
+  <li>首先，可以试图用<code class="highlighter-rouge">git push origin </code>推送自己的修改；</li>
+  <li>如果推送失败，则因为远程分支比你的本地更新，需要先用<code class="highlighter-rouge">git pull</code>试图合并；</li>
+  <li>如果合并有冲突，则解决冲突，并在本地提交；</li>
+  <li>没有冲突或者解决掉冲突后，再用<code class="highlighter-rouge">git push origin </code>推送就能成功！</li>
+</ol>
+
+<p>如果<code class="highlighter-rouge">git pull</code>提示<code class="highlighter-rouge">no tracking information</code>，则说明本地分支和远程分支的链接关系没有创建，用命令<code class="highlighter-rouge">git branch --set-upstream-to  origin/</code>。</p>
+
+<p>这就是多人协作的工作模式，一旦熟悉了，就非常简单。</p>
+
+<h3 id="小结">小结</h3>
+
+<ul>
+  <li>查看远程库信息，使用<code class="highlighter-rouge">git remote -v</code>；</li>
+  <li>本地新建的分支如果不推送到远程，对其他人就是不可见的；</li>
+  <li>从本地推送分支，使用<code class="highlighter-rouge">git push origin branch-name</code>，如果推送失败，先用<code class="highlighter-rouge">git pull</code>抓取远程的新提交；</li>
+  <li>在本地创建和远程分支对应的分支，使用<code class="highlighter-rouge">git checkout -b branch-name origin/branch-name</code>，本地和远程分支的名称最好一致；</li>
+  <li>建立本地分支和远程分支的关联，使用<code class="highlighter-rouge">git branch --set-upstream branch-name origin/branch-name</code>；</li>
+  <li>从远程抓取分支，使用<code class="highlighter-rouge">git pull</code>，如果有冲突，要先处理冲突。</li>
+</ul>
+
+<h2 id="rebase">rebase</h2>
+
+<p>使历史记录的分支看上去是一条直线；</p>
+
+<p>通过pull -&gt; push远程分支同步后，我们对<code class="highlighter-rouge">hello.py</code>这个文件做了两次提交。用<code class="highlighter-rouge">git log</code>命令看看：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 582d922 (HEAD -&gt; master) add author
+* 8875536 add comment
+* d1be385 (origin/master) init hello
+*   e5e69f1 Merge branch 'dev'
+|\  
+| *   57c53ab (origin/dev, dev) fix env conflict
+| |\  
+| | * 7a5e5dd add env
+| * | 7bd91f1 add new env
+...
+</code></pre></div></div>
+
+<h1 id="标签管理">标签管理</h1>
+
+<p>tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。</p>
+
+<h2 id="创建标签">创建标签</h2>
+
+<p>创建标签前需先切换到打标签的分支上</p>
+
+<p><strong>打标签的命令</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git tag v1.0
+</code></pre></div></div>
+
+<p><strong>查看所有标签</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git tag
+</code></pre></div></div>
+
+<p>默认标签是打在最新提交的commit id 上，也可以打标签到指定的历史提交id</p>
+
+<p><strong>添加标签到指定提交id</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git tag v0.9 f52c633
+</code></pre></div></div>
+
+<p>注意，标签不是按时间顺序列出，而是按字母排序的。可以用<code class="highlighter-rouge">git show </code>查看标签信息：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git show v0.9
+commit f52c63349bc3c1593499807e5c8e972b82c8f286 (tag: v0.9)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:56:54 2018 +0800
+
+    add merge
+
+diff --git a/readme.txt b/readme.txt
+...
+</code></pre></div></div>
+
+<p><strong>创建带有说明的标签</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git tag -a v0.1 -m "version 0.1 released" 1094adb
+</code></pre></div></div>
+
+<p><strong>查看标签说明文字</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git show tagname
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git show v0.1
+tag v0.1
+Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 22:48:43 2018 +0800
+
+version 0.1 released
+
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (tag: v0.1)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+diff --git a/readme.txt b/readme.txt
+</code></pre></div></div>
+
+<p>注意：标签总是和某个commit挂钩。如果这个commit既出现在master分支，又出现在dev分支，那么在这两个分支上都可以看到这个标签。</p>
+
+<h2 id="操作标签">操作标签</h2>
+
+<p><strong>删除标签</strong></p>
+
+<p>创建的标签默认只存在于本地，不会推送到远程。可以放心删除</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git tag -d tagname
+</code></pre></div></div>
+
+<p><strong>推送某个标签到远程</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin tagname
+</code></pre></div></div>
+
+<p><strong>一次性推送全部标签</strong></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git push origin tags
+</code></pre></div></div>
+
+<p><strong>删除远程标签</strong></p>
+
+<p>（1）通过<code class="highlighter-rouge">git tag -d</code>删除本地标签</p>
+
+<p>（2）通过<code class="highlighter-rouge">git-push orgin :refs/tags/tagname</code> 从远程删除</p>
+
+<h1 id="忽略特殊文件">忽略特殊文件</h1>
+
+<p>有些时候，你必须把某些文件放到Git工作目录中，但又不能提交它们，比如保存了数据库密码的配置文件啦，等等，每次<code class="highlighter-rouge">git status</code>都会显示<code class="highlighter-rouge">Untracked files ...</code>，有强迫症的童鞋心里肯定不爽。</p>
+
+<p>好在Git考虑到了大家的感受，这个问题解决起来也很简单，在Git工作区的根目录下创建一个特殊的<code class="highlighter-rouge">.gitignore</code>文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件。</p>
+
+<p>不需要从头写<code class="highlighter-rouge">.gitignore</code>文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：https://github.com/github/gitignore</p>
+
+<p>忽略文件的原则是：</p>
+
+<ol>
+  <li>忽略操作系统自动生成的文件，比如缩略图等；</li>
+  <li>忽略编译生成的中间文件、可执行文件等，也就是如果一个文件是通过另一个文件自动生成的，那自动生成的文件就没必要放进版本库，比如Java编译产生的<code class="highlighter-rouge">.class</code>文件；</li>
+  <li>忽略你自己的带有敏感信息的配置文件，比如存放口令的配置文件。</li>
+</ol>
+
+<h1 id="配置别名">配置别名</h1>
+
+<p>有没有经常敲错命令？比如<code class="highlighter-rouge">git status</code>？<code class="highlighter-rouge">status</code>这个单词真心不好记。</p>
+
+<p>如果敲<code class="highlighter-rouge">git st</code>就表示<code class="highlighter-rouge">git status</code>那就简单多了，当然这种偷懒的办法我们是极力赞成的。</p>
+
+<p>我们只需要敲一行命令，告诉Git，以后<code class="highlighter-rouge">st</code>就表示<code class="highlighter-rouge">status</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git config --global alias.st status
+</code></pre></div></div>
+
+<p>好了，现在敲<code class="highlighter-rouge">git st</code>看看效果。</p>
+
+<p>当然还有别的命令可以简写，很多人都用<code class="highlighter-rouge">co</code>表示<code class="highlighter-rouge">checkout</code>，<code class="highlighter-rouge">ci</code>表示<code class="highlighter-rouge">commit</code>，<code class="highlighter-rouge">br</code>表示<code class="highlighter-rouge">branch</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git config --global alias.co checkout
+$ git config --global alias.ci commit
+$ git config --global alias.br branch
+</code></pre></div></div>
+
+<p>以后提交就可以简写成：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ git ci -m "bala bala bala..."
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">--global</code>参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用。</p>
+
+<h1 id="撤销回滚操作">撤销回滚操作</h1>
+
+<p>开发过程中，你肯定会遇到这样的场景：</p>
+
+<p>场景一：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>糟了，我刚把不想要的代码，commit到本地仓库中了，但是还没有做push操作！
+</code></pre></div></div>
+
+<p>场景二：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>彻底完了，刚线上更新的代码出现问题了，需要还原这次提交的代码！
+</code></pre></div></div>
+
+<p>场景三：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>刚才我发现之前的某次提交太愚蠢了，现在想要干掉它！
+</code></pre></div></div>
+
+<p>撤销</p>
+
+<p>上述场景一，在未进行git push前的所有操作，都是在“本地仓库”中执行的。我们暂且将“本地仓库”的代码还原操作叫做“撤销”！</p>
+
+<p>**情况一：文件被修改了，但未执行git add操作(working tree内撤销) **</p>
+
+<p>git checkout fileName
+git checkout .</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+</code></pre></div></div>
+
+<p>情况二：同时对多个文件执行了git add操作，但本次只想提交其中一部分文件</p>
+
+<p>$ git add *
+$ git status</p>
+<h2 id="取消暂存">取消暂存</h2>
+
+<p>$ git reset HEAD <filename></filename></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+4
+</code></pre></div></div>
+
+<p>情况三：文件执行了git add操作，但想撤销对其的修改（index内回滚）</p>
+
+<h2 id="取消暂存-1">取消暂存</h2>
+
+<p>git reset HEAD fileName</p>
+<h2 id="撤销修改">撤销修改</h2>
+
+<p>git checkout fileName</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+4
+</code></pre></div></div>
+
+<p>情况四：修改的文件已被git commit，但想再次修改不再产生新的Commit</p>
+
+<h2 id="修改最后一次提交">修改最后一次提交</h2>
+
+<p>$ git add sample.txt
+$ git commit –amend -m”说明”</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+</code></pre></div></div>
+
+<p>情况五：已在本地进行了多次git commit操作，现在想撤销到其中某次Commit</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>git reset [–hard</td>
+      <td>soft</td>
+      <td>mixed</td>
+      <td>merge</td>
+      <td>keep] [commit</td>
+      <td>HEAD]</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>具体参数和使用说明，请查看：Git Pro深入浅出（二）中的重置揭秘部分
+回滚</p>
+
+<p>上述场景二，已进行git push，即已推送到“远程仓库”中。我们将已被提交到“远程仓库”的代码还原操作叫做“回滚”！注意：对远程仓库做回滚操作是有风险的，需提前做好备份和通知其他团队成员！</p>
+
+<p>如果你每次更新线上，都会打tag，那恭喜你，你可以很快的处理上述场景二的情况</p>
+
+<p>git checkout <tag></tag></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>如果你回到当前HEAD指向</p>
+
+<p>git checkout <branch_name></branch_name></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>情况一：撤销指定文件到指定版本</p>
+
+<h2 id="查看指定文件的历史版本">查看指定文件的历史版本</h2>
+
+<p>git log <filename></filename></p>
+<h2 id="回滚到指定commitid">回滚到指定commitID</h2>
+
+<p>git checkout <commitID> <filename></filename></commitID></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+4
+</code></pre></div></div>
+
+<p>情况二：删除最后一次远程提交</p>
+
+<p>方式一：使用revert</p>
+
+<p>git revert HEAD
+git push origin master</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+</code></pre></div></div>
+
+<p>方式二：使用reset</p>
+
+<p>git reset –hard HEAD^
+git push origin master -f</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+</code></pre></div></div>
+
+<p>二者区别：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>revert是放弃指定提交的修改，但是会生成一次新的提交，需要填写提交注释，以前的历史记录都在；
+reset是指将HEAD指针指到指定提交，历史记录中不会出现放弃的提交记录。
+</code></pre></div></div>
+
+<p>情况三：回滚某次提交</p>
+
+<h2 id="找到要回滚的commitid">找到要回滚的commitID</h2>
+
+<p>git log
+git revert commitID</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+2
+3
+</code></pre></div></div>
+
+<p>删除某次提交</p>
+
+<p>git log –oneline -n5</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>Git撤销&amp;回滚操作-log</p>
+
+<p>git rebase -i “commit id”^</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p><em>*注意：</em>需要注意最后的^*号，意思是commit id的前一次提交</p>
+
+<p>git rebase -i “5b3ba7a”^</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>Git撤销&amp;回滚操作-rebase</p>
+
+<p>在编辑框中删除相关commit，如pick 5b3ba7a test2，然后保存退出（如果遇到冲突需要先解决冲突）！</p>
+
+<p>git push origin master -f</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1
+</code></pre></div></div>
+
+<p>通过上述操作，如果你想对历史多个commit进行处理或者，可以选择git rebase -i，只需删除对应的记录就好。rebase还可对 commit 消息进行编辑，以及合并多个commit。</p>
+
